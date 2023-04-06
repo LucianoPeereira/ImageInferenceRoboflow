@@ -1,0 +1,160 @@
+<nav class="page-breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a routerLink=".">Serviços</a></li>
+    <li class="breadcrumb-item active" aria-current="page"><a routerLink="/apps/services/object-detection/list">Lista de
+        Detecção de Objetos</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{title}}</li>
+  </ol>
+</nav>
+
+<div class="row">
+  <div class="col-xl-12 main-content">
+    <h1 class="page-breadcrumb">{{title}}</h1>
+    <hr>
+  </div>
+</div>
+
+<script src="https://cdn.roboflow.com/0.2.20/roboflow.js"></script>
+
+
+<div class="container">
+
+  <div class="row margin-top">
+    <div class="col-sm-12 block-contain">
+      <div class="row">
+        <div class="col-sm-6 col-md-12 col-lg-3 ">
+          <div class="row">
+
+            <div class="col-sm-12 block3 p-1" style="justify-content: center; align-items: center;">
+              <div class="card text-center rounded" style="height: 390px;">
+                <div class="card-body">
+                  <h4 class="card-title">Amostras de Imagem</h4>
+                  <div class="row ms-0 me-0">
+                    <div id="prechosen_images_parent">
+                      <div id="prechosen_images">
+                        <img src="assets/images/roboflow/airport/airport-1.jpg" id="picture_1" />
+                        <img src="assets/images/roboflow/airport/airport-2.jpg" id="picture_2" />
+                        <img src="assets/images/roboflow/airport/airport-3.jpg" id="picture_3" />
+                        <img src="assets/images/roboflow/airport/airport-4.jpg" id="picture_4" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-12 block4 p-1" style="justify-content: center; align-items: center;">
+              <div class="card text-center" style="height: 210px;">
+                <div class="card-body">
+                  <h6 class="card-title">Upload de Imagem</h6>
+                  <div class="mb-3 d-grid gap-2">
+                    <input type="text" class="form-control" id="inputUrl" name="inputUrl" [(ngModel)]="inputUrl"
+                      autocomplete="off" placeholder="URL">
+                    <input (change)="this.onFileSelected($event)" class="file-input" type="file"
+                      enctype="multipart/form-data" id="formFile" #fileUpload hidden>
+                    <div class="btn-group" role="group" aria-label="Basic example">
+                      <button type="button" class="btn btn-primary btn-icon-text" (click)="fileUpload.click()">
+                        <i class="feather icon-upload btn-icon-prepend"></i>
+                        Upload
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-6 col-md-12 col-lg-6 block6 p-1" style="justify-content: center; align-items: center;">
+          <div class="card" style="display: flex; align-items: center; justify-content: center; height: 610px;">
+              <div class="icon-container">
+                <div *ngIf="isLoading" class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
+              <div class="image-container">
+                <img [src]="imageLocal" id="picture" alt="Your image" style="display: none;">
+              </div>
+            <canvas width="600" height="600" id="picture_canvas" style="margin: auto; display: none;"></canvas>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-12 col-lg-3 ">
+
+          <div class="row">
+            <div class="col-sm-12 block7 p-1" style="justify-content: center; align-items: center;">
+              <div class="card text-center" style="height: 170px;">
+                <div class="p-2">
+                  <h6 class="card-title">Configurações</h6>
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div>
+                        <p class="d-flex justify-content-between align-items-center">
+                          Confidence Threshold:
+                          <span class="badge bg-danger fw-bolder ms-auto">{{confidence}}</span>
+                        </p>
+                        <div class="d-flex mt-2 mb-2">
+                          <p>0%</p>
+                          <input type="range" min="1" max="99" [(ngModel)]="confidence" value="confidence"
+                            class="slider" id="confidenceSlider" style="width: 290px;">
+                          <p>100%</p>
+                        </div>
+                      </div>
+                      <div>
+                        <p class="d-flex justify-content-between align-items-center">
+                          Overlap Threshold:
+                          <span class="badge bg-danger fw-bolder ms-auto">{{overlap}}</span>
+                        </p>
+                        <div class="d-flex mt-2 mb-2">
+                          <p>0%</p>
+                          <input type="range" min="1" max="99" [(ngModel)]="overlap" value="overlap" class="slider"
+                            id="confidenceSlider" style="width: 290px;">
+                          <p>100%</p>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-12 block8 p-1" style="justify-content: center; align-items: center;">
+              <div class="card text-center" style="height: 90px;">
+                <div class="p-2">
+                  <h6 class="card-title">Modo de Exibição</h6>
+                  <div class="mb-3">
+                    <select class="form-select" id="selectMode">
+                      <option value="tax">Taxa de Confiança</option>
+                      <option value="label">Rótulos</option>
+                      <option value="box">Caixas</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-sm-12 block9 p-1" style="justify-content: center; align-items: center;">
+              <div class="card text-center" style="height: 330px;">
+                <div class="p-2">
+
+                  <div class="row">
+                    <div class="col-12 col-md-12">
+                      <pre class="jsonDisplay" id="jsonDisplay"
+                        style="display: none; text-align: left; height: 310px;"></pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,116 @@
+body {
+    text-align: center;
+    color: white;
+    background-color: #f0f0f0;
+}
+
+h1 {
+    margin-top: 40px;
+}
+
+.container > div {
+    background: #f1f2ff;
+}
+
+.margin-top {
+    margin-top: 10px;
+}
+
+.empty-block {
+    height: 150px;
+}
+
+.block-contain {
+    height: 620px;
+}
+
+.block3 {
+    height: 400px;
+}
+
+.block4 {
+    height: 220px;
+}
+
+.block5 {
+    height: 300px;
+}
+
+.block6 {
+    height: 620px;
+}
+
+.block7 {
+    height: 180px;
+}
+
+.block8 {
+    height: 100px;
+}
+
+.block9 {
+    height: 340px;
+}
+
+.file-input {
+    display: none;
+}
+
+.jsonDisplay {
+    overflow-y: scroll;
+}
+
+.jsonDisplay::-webkit-scrollbar {
+    display: none;
+}
+
+#prechosen_images_parent {
+    // display: none;
+    border-radius: 16px;
+    background-color: #E9ECEF;
+    width: 640px;
+    margin-top: 20px;
+  }
+  #prechosen_images {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: center;
+    align-content: center;
+  }
+  #prechosen_images img {
+    width: 100%;
+    max-width: 100px;
+    height: auto;
+    border-radius: 16px;
+    margin: 10px;
+    cursor: pointer;
+    max-height: 100px;
+    height: 100px;
+  }
+
+  .icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px; /* Set the width of the icon container */
+    height: 50px; /* Set the height of the icon container */
+    
+  }
+  
+  .image-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    // position: absolute;
+  }
+  
+  img {
+    max-width: 100%;
+    height: auto;
+  }
