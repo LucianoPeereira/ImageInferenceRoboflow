@@ -54,26 +54,6 @@ const models: any = {
     ],
   },
 }
-
-let bounding_box_colors: any = {};
-
-
-const color_choices = [
-  "#C7FC00",
-  "#FF00FF",
-  "#8622FF",
-  "#FE0056",
-  "#00FFCE",
-  "#FF8000",
-  "#00B7EB",
-  "#FFFF00",
-  "#0E7AFE",
-  "#FFABAB",
-  "#0000FF",
-  "#CCCCCC",
-];
-
-
 @Component({
   selector: 'app-object-detection',
   templateUrl: './object-detection.component.html',
@@ -119,8 +99,10 @@ export class ObjectDetectionComponent implements OnInit {
     const prechosenImagesChildren: any = prechosenImages?.children;
 
     document.getElementById("prechosen_images")?.addEventListener("click", (event: MouseEvent) => {
-      // const prechosenImagesParent = document.getElementById("prechosen_images_parent");
-      // (document.getElementById("prechosen_images_parent") as HTMLElement).style.display = "block";
+      const canvas = document.getElementById("picture_canvas") as HTMLCanvasElement;
+      const ctx:any = canvas.getContext("2d");
+
+      (document.getElementById("picture") as HTMLElement).style.display = "block";
       (document.getElementById("picture_canvas") as HTMLElement).style.display = "none";
       let target: any = event.target as HTMLElement;
       while (target && target.tagName !== 'IMG') {
@@ -131,6 +113,7 @@ export class ObjectDetectionComponent implements OnInit {
         let src = imageElement.src;
         src = src.replace("http://localhost:4200/", "");
         this.imageLocal = src;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         this.imageInference(src);
       }
     });
@@ -139,7 +122,6 @@ export class ObjectDetectionComponent implements OnInit {
     input.addEventListener("keyup", (event: any) => {
       if (event.keyCode === 13) {
         event.preventDefault();
-        console.log(this.inputUrl);
         this.imageLocal = this.inputUrl;
         //  this.imageInference(this.inputUrl);
       }
@@ -175,7 +157,6 @@ export class ObjectDetectionComponent implements OnInit {
             this.imageLocal = event.target.result;
             (document.getElementById("picture") as HTMLElement).style.display = "block";
             (document.getElementById("picture_canvas") as HTMLElement).style.display = "none";
-            console.log(event.target.result)
             this.imageInference(event.target.result);
           }
         };
@@ -187,18 +168,15 @@ export class ObjectDetectionComponent implements OnInit {
     }
   }
 
-
   imageInference(image?: any) {
     const canvas = document.getElementById("picture_canvas") as HTMLCanvasElement;
-    const ctx:any = canvas.getContext("2d");
+    const ctx: any = canvas.getContext("2d");
     const img = new Image();
-    let selectedValue = '';
 
     img.src = image;
-
     this.isLoading = true;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    (document.getElementById("picture") as HTMLElement).style.display = "block";
 
     img.onload = () => {
       setImageState("picture_canvas");
@@ -210,9 +188,12 @@ export class ObjectDetectionComponent implements OnInit {
         ctx?.beginPath();
         // draw image to canvas
         ctx?.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+
         const selectElement = document.getElementById("selectMode") as HTMLSelectElement;
-        selectElement.addEventListener("change", () => 
-        ctx?.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight));
+        selectElement.addEventListener("change", () => ctx?.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight));
+
+        const rangeInput = document.getElementById("confidenceSlider") as HTMLInputElement;
+        rangeInput.addEventListener("input", () => ctx?.drawImage(img, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight));
 
         const mappedPredictions = predictions.map(function (prediction: any) {
           return {
@@ -221,15 +202,17 @@ export class ObjectDetectionComponent implements OnInit {
             confidence: prediction.confidence,
           };
         });
+
         this.isLoading = false;
         (document.getElementById("picture") as HTMLElement).style.display = "none";
-        drawBoundingBoxes(mappedPredictions, canvas, ctx, scalingRatio, sx, sy, false);
         (document.getElementById("picture_canvas") as HTMLElement).style.display = "block";
+        drawBoundingBoxes(mappedPredictions, canvas, ctx, scalingRatio, sx, sy, false);
       }
       );
     };
   }
-  Test(width = 550, height = 550) {
+
+  ImageInferenceWithUrl(width = 550, height = 550) {
     const canvas = document.getElementById("picture_canvas") as HTMLCanvasElement;
     const ctx = canvas.getContext("2d");
     const img = new Image();
@@ -238,7 +221,6 @@ export class ObjectDetectionComponent implements OnInit {
 
     ctx?.drawImage(img, 0, 0, width, height, 0, 0, width, height);
   }
-
 }
 
 function setImageState(canvasId = "picture_canvas", width = 550, height = 550): void {
@@ -357,108 +339,107 @@ function drawBoundingBoxes(
   fromDetectAPI = false): void {
 
   const selectElement = document.getElementById("selectMode") as HTMLSelectElement;
+  const rangeInput = document.getElementById("confidenceSlider") as HTMLInputElement;
+
   let selectedValue = selectElement.value;
+  let confidenceValue = Number((rangeInput.value))/100;
   handleDraw();
-  
+
   selectElement.addEventListener("change", () => {
     selectedValue = selectElement.value;
     handleDraw();
-    console.log(selectedValue)
   });
 
-  // const rangeInput = document.getElementById("confidenceSlider") as HTMLInputElement;
-  // rangeInput.addEventListener("change", handleRangeInputChange);
+  rangeInput.addEventListener("input", () => {
+    confidenceValue = Number((rangeInput.value))/100;
+    handleDraw();
+  });
 
   function handleDraw() {
-  // const value = Number((event.target as HTMLInputElement).value);
-  // ctx?.clearRect(0, 0, canvas.width, canvas.height);
-  for (let i = 0; i < predictions.length; i++) {
-   
-    // if (predictions[i].confidence >= value/100) {
-    let confidence = predictions[i].confidence;
+    for (let i = 0; i < predictions.length; i++) {
+      let confidence = predictions[i].confidence;
+      if (predictions[i].confidence > confidenceValue) {
 
-    ctx.scale(1, 1);
-    ctx.strokeStyle = '#bce61e';
-    
-    const prediction = predictions[i];
+        ctx.scale(1, 1);
+        ctx.strokeStyle = '#bce61e';
+        const prediction = predictions[i];
 
-    var x1 = prediction.bbox.x - prediction.bbox.width / 2;
-    var y1 = prediction.bbox.y - prediction.bbox.height / 2;
-    var x2 = prediction.bbox.width;
-    var y2 = prediction.bbox.height;
+        var x1 = prediction.bbox.x - prediction.bbox.width / 2;
+        var y1 = prediction.bbox.y - prediction.bbox.height / 2;
+        var x2 = prediction.bbox.width;
+        var y2 = prediction.bbox.height;
 
-    if (!fromDetectAPI) {
-      x1 -= sx;
-      y1 -= sy;
+        if (!fromDetectAPI) {
+          x1 -= sx;
+          y1 -= sy;
 
-      x1 *= scalingRatio;
-      y1 *= scalingRatio;
-      x2 *= scalingRatio;
-      y2 *= scalingRatio;
-    }
-    if (x1 < 0) {
-      x2 += x1;
-      x1 = 0;
-    }
+          x1 *= scalingRatio;
+          y1 *= scalingRatio;
+          x2 *= scalingRatio;
+          y2 *= scalingRatio;
+        }
+        if (x1 < 0) {
+          x2 += x1;
+          x1 = 0;
+        }
 
-    if (y1 < 0) {
-      y2 += y1;
-      y1 = 0;
-    }
+        if (y1 < 0) {
+          y2 += y1;
+          y1 = 0;
+        }
 
-    ctx.rect(x1, y1, x2, y2);
-    ctx.fillStyle = "rgba(0, 0, 0, 0)";
-    ctx.fill();
+        ctx.rect(x1, y1, x2, y2);
+        ctx.fillStyle = "rgba(0, 0, 0, 0)";
+        ctx.fill();
 
-    ctx.fillStyle = ctx.strokeStyle;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x1, y1, x2, y2);
+        ctx.fillStyle = ctx.strokeStyle;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x1, y1, x2, y2);
 
-    if (selectedValue === 'label') {
-      var text = ctx.measureText(
-        prediction.class + " " + Math.round(confidence * 100) + "%"
-      );
-  
-      if (y1 < 20) {
-        y1 = 30
+        if (selectedValue === 'label') {
+          var text = ctx.measureText(
+            prediction.class + " " + Math.round(confidence * 100) + "%"
+          );
+
+          if (y1 < 20) {
+            y1 = 30
+          }
+
+          ctx.fillStyle = ctx.strokeStyle;
+          ctx.fillRect(x1 - 2, y1 - 30, text.width + 4, 30);
+          ctx.font = "12px monospace";
+          ctx.fillStyle = "black";
+
+          ctx.fillText(
+            prediction.class + " " + Math.round(confidence * 100) + "%",
+            x1,
+            y1 - 10
+          );
+        }
+        else if (selectedValue === 'tax') {
+          var text = ctx.measureText(
+            Math.round(confidence * 100) + "%"
+          );
+
+          if (y1 < 20) {
+            y1 = 30
+          }
+
+          ctx.fillStyle = ctx.strokeStyle;
+          ctx.fillRect(x1 - 2, y1 - 30, text.width + 4, 30);
+
+          ctx.font = "12px monospace";
+
+          ctx.fillStyle = "black";
+          ctx.fillText(
+            Math.round(confidence * 100) + "%",
+            x1,
+            y1 - 10
+          );
+        }
       }
-  
-      ctx.fillStyle = ctx.strokeStyle;
-      ctx.fillRect(x1 - 2, y1 - 30, text.width + 4, 30);
-
-      ctx.font = "12px monospace";
-
-      ctx.fillStyle = "black";
-      ctx.fillText(
-        prediction.class + " " + Math.round(confidence * 100) + "%",
-        x1,
-        y1 - 10
-      );
-    }
-    else if (selectedValue === 'tax') {
-      var text = ctx.measureText(
-        Math.round(confidence * 100) + "%"
-      );
-  
-      if (y1 < 20) {
-        y1 = 30
-      }
-  
-      ctx.fillStyle = ctx.strokeStyle;
-      ctx.fillRect(x1 - 2, y1 - 30, text.width + 4, 30);
-
-      ctx.font = "12px monospace";
-
-      ctx.fillStyle = "black";
-      ctx.fillText(
-       Math.round(confidence * 100) + "%",
-        x1,
-        y1 - 10
-      );
     }
   }
-  }
-  // }
 }
 
 function showJsoninList(data: JSON) {
