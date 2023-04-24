@@ -22,7 +22,7 @@
   <div class="row margin-top">
     <div class="col-sm-12 block-contain">
       <div class="row">
-        <div class="col-sm-6 col-md-12 col-lg-3 ">
+        <div class="col-sm-3 col-md-3 col-lg-3 ">
           <div class="row">
 
             <div class="col-sm-12 block3 p-1" style="justify-content: center; align-items: center;">
@@ -69,14 +69,15 @@
         <div class="col-sm-6 col-md-12 col-lg-6 block6 p-1" style="justify-content: center; align-items: center;">
           <div class="card" style="display: flex; align-items: center; justify-content: center; height: 610px;">
               <div class="icon-container">
-                <div *ngIf="isLoading" class="spinner-border text-primary" role="status">
+                <div *ngIf="isLoading" class="spinner-border text-danger" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
               </div>
               <div class="image-container">
                 <img [src]="imageLocal" id="picture" alt="Your image" style="display: none;">
               </div>
-            <canvas width="600" height="600" id="picture_canvas" style="margin: auto; display: none;"></canvas>
+              <canvas width="600" height="600" id="picture_canvas" style="display: none;"></canvas>
+              
           </div>
         </div>
         <div class="col-sm-6 col-md-12 col-lg-3 ">
